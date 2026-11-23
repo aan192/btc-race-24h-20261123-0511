@@ -103,6 +103,9 @@ await runBars({
         const room = state.weightRoom(SYMBOL);
         let notional = state.cash < room ? state.cash : room;
         if (notional < BigInt(state.hello.fees.min_notional_quote_units)) return [];
+        console.error(
+          `seq ${state.seq} buy ${SYMBOL} notional ${notional} (gap ${gap.toFixed(1)} vs band ${band.toFixed(1)})`,
+        );
         orders.push({
           side: 'buy',
           symbol: SYMBOL,
@@ -119,6 +122,10 @@ await runBars({
     const tookProfit = value * TAKE_PROFIT[1] >= held.cost * TAKE_PROFIT[0];
     const stoppedOut = value * STOP_LOSS[1] <= held.cost * STOP_LOSS[0];
     if (crossedDown || tookProfit || stoppedOut) {
+      const why = crossedDown ? 'trend-down' : tookProfit ? 'take-profit' : 'stop-loss';
+      console.error(
+        `seq ${state.seq} sell ${held.qty} ${SYMBOL} (${why}): value ${value} vs cost ${held.cost}`,
+      );
       orders.push({
         side: 'sell',
         symbol: SYMBOL,
